@@ -18,25 +18,28 @@ class Phil2:
 	def left(self,i):
 		return(i-1+NUM_PHIL)%NUM_PHIL
 	def pickup(self):
-		state[self.id]=2
-		self.test(self.id)
-		if state[self.id!=3]:
-			can_eat[self.id].wait()
+			state[self.id]=2
+			self.test(self.id)
+			should_wait=False
+			while state[self.id!=3]:
+				should_wait=True
+			if should_wait=True:
+				can_eat[self.id].wait()
 	def putdown(self):
-		state[self.id]=1
-		self.test(self.right())
-		self.test(self.left())
+			state[self.id]=1
+			can_eat[self.left()].notify()
+			can_eat[self.right()].notify()
 	def test(self,i):
 		if (state[i]==2 and state[self.right(i)]!=3 and state[self.left(i)]!=3):
 			state[i]=3
-			can_eat[i].notify()
 	def eat(self):
 		self.m-=1
 		sleep(random.random())
 		print('{} eat success'.format(self.id))
-#where when a philosopher finishes eating, the 
-#neighbors get tested to see if they can eat.	
+	
 
+# no-holding : Philosopher tries to pick up right fork then
+# check left fork.
 
 def condition_solution(phil):
 	global state
@@ -45,7 +48,6 @@ def condition_solution(phil):
 	while phil.m>0:
 		with can_eat[phil.id]:
 			sleep(random.random())
-			print('thinking success')
 			phil.pickup()
 			phil.eat()
 			phil.putdown()
@@ -56,6 +58,8 @@ def main(numofphil=5, numofmeal=10):
 	global NUM_PHIL
 	global can_eat
 	global state
+	global lock
+	lock=Semaphore()
 	NUM_PHIL=numofphil
 #solution 4
 #Tanenbaum  solution, where when a philosopher finishes eating, the 
