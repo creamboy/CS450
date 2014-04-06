@@ -33,7 +33,7 @@ class Phil2:
 # if this philosopher acquires chopsticks, then release the lock on state list and proceed to next step				
 			else:
 				lock.release()
-		return 0
+				return 0
 	def putdown(self):
 			lock.acquire()
 			state[self.id]=1
