@@ -18,25 +18,45 @@ class Phil2:
 	def left(self,i):
 		return(i-1+NUM_PHIL)%NUM_PHIL
 	def pickup(self):
-		state[self.id]=2
-		self.test(self.id)
-		if state[self.id!=3]:
-			can_eat[self.id].wait()
+		while True:
+		 # put a lock on the state list to exclude access from other philosophers	
+			lock.acquire()
+		# set state = HUNGRY	
+			state[self.id]=2
+ # check if this philosopher could acquire chopsticks, set state = EATING if could acquire chopsticks			
+			self.test(self.id)
+  # if this philosopher cannot acquire chopsticks, put it to sleep
+    # and release the lock on the state list so that other philosophers could access it			
+			if state[self.id]!=3:
+				lock.release()
+				can_eat[self.id].wait()
+# if this philosopher acquires chopsticks, then release the lock on state list and proceed to next step				
+			else:
+				lock.release()
+		return 0
 	def putdown(self):
-		state[self.id]=1
-		self.test(self.right())
-		self.test(self.left())
+			lock.acquire()
+			state[self.id]=1
+			lock.release()
+			try:
+				can_eat[self.left(self.id)].notify()
+			except RuntimeError:
+				pass
+			try:
+				can_eat[self.right(self.id)].notify()
+			except RuntimeError:
+				pass
 	def test(self,i):
 		if (state[i]==2 and state[self.right(i)]!=3 and state[self.left(i)]!=3):
 			state[i]=3
-			can_eat[i].notify()
 	def eat(self):
 		self.m-=1
 		sleep(random.random())
 		print('{} eat success'.format(self.id))
-#where when a philosopher finishes eating, the 
-#neighbors get tested to see if they can eat.	
+	
 
+# no-holding : Philosopher tries to pick up right fork then
+# check left fork.
 
 def condition_solution(phil):
 	global state
@@ -45,7 +65,6 @@ def condition_solution(phil):
 	while phil.m>0:
 		with can_eat[phil.id]:
 			sleep(random.random())
-			print('thinking success')
 			phil.pickup()
 			phil.eat()
 			phil.putdown()
@@ -56,6 +75,8 @@ def main(numofphil=5, numofmeal=10):
 	global NUM_PHIL
 	global can_eat
 	global state
+	global lock
+	lock=Semaphore()
 	NUM_PHIL=numofphil
 #solution 4
 #Tanenbaum  solution, where when a philosopher finishes eating, the 
