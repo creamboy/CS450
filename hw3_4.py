@@ -18,6 +18,7 @@ class Phil2:
 	def left(self,i):
 		return(i-1+NUM_PHIL)%NUM_PHIL
 	def pickup(self):
+<<<<<<< HEAD
 		while True:
 		 # put a lock on the state list to exclude access from other philosophers	
 			lock.acquire()
@@ -46,6 +47,19 @@ class Phil2:
 				can_eat[self.right(self.id)].notify()
 			except RuntimeError:
 				pass
+=======
+			state[self.id]=2
+			self.test(self.id)
+			should_wait=False
+			while state[self.id!=3]:
+				should_wait=True
+			if should_wait=True:
+				can_eat[self.id].wait()
+	def putdown(self):
+			state[self.id]=1
+			can_eat[self.left()].notify()
+			can_eat[self.right()].notify()
+>>>>>>> 911a61516c98eec643138dbb935324be47980dce
 	def test(self,i):
 		if (state[i]==2 and state[self.right(i)]!=3 and state[self.left(i)]!=3):
 			state[i]=3
