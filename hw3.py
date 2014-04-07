@@ -93,36 +93,22 @@ class Phil2:
 	def __init__(self,n,m):
 		self.id=n
 		self.m=m
-		self.monitor_lock=RLock()
 	def right(self, i):
 		return(i+1)%NUM_PHIL
 	def left(self,i):
 		return(i-1+NUM_PHIL)%NUM_PHIL
-	def synchronized(f):
 
-        	def wrapper(self, *args, **kw):
-            # The 'with' syntax automagically
-            # takes care of acquiring and
-            # releasing the lock in a try-finally
-            # around the specified block
-            		with self.monitor_lock:
-                		return f(self, *args, **kw)
-        	return wrapper
-
-	@synchronized
 	def pickup(self):
         	state[self.id]=2
         	self.test(self.id)
         	if state[self.id] != 3:
             		can_eat[self.id].wait()
 
-	@synchronized
 	def putdown(self):
         	state[self.id]=1
         	self.test(self.right(self.id))
         	self.test(self.left(self.id))
 
-	@synchronized
 	def test(self, i):
         	if (state[self.left(self.id)] != 3
             	and state[self.right(self.id)] != 3
@@ -144,7 +130,7 @@ def condition_solution(phil):
 				phil.pickup()
 				phil.eat()
 				phil.putdown()
-				sleep(random.random())
+			
 def main(numofphil=5, numofmeal=10):
 	global NUM_PHIL
 	NUM_PHIL=numofphil
@@ -224,5 +210,5 @@ def main(numofphil=5, numofmeal=10):
 		n.join()
 	end = time()
 	ttime = (end-start)
-	print('Tanenbaum     {:0.01f}s'.format(ttime))
+	print('Tanenbaum:    {:0.01f}s'.format(ttime))
 main()
