@@ -76,8 +76,7 @@ def main(numofphil=5, numofmeal=10):
 	global state
 	global lock
 	lock=RLock()
-	global interrupted
-	interrupted=False
+
 	NUM_PHIL=numofphil
 #solution 4
 #Tanenbaum  solution, where when a philosopher finishes eating, the 
