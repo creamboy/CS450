@@ -1,5 +1,5 @@
 # CS 450 HW3 Fan Zhang A20280966
-from threading import Thread, Semaphore, Condition
+from threading import Thread, Semaphore, Condition,RLock
 import random, time
 from time import sleep
 from time import time
@@ -13,17 +13,13 @@ class Phil2:
 	def __init__(self,n,m):
 		self.id=n
 		self.m=m
+		self.monitor_lock=RLock()
 	def right(self, i):
 		return(i+1)%NUM_PHIL
 	def left(self,i):
 		return(i-1+NUM_PHIL)%NUM_PHIL
 	def synchronized(f):
-        """
-        This defines a 'decorator' which wraps the
-        decorated function call with acquiring and
-        releasing the lock associated with the
-        monitor instance.
-        """
+
         	def wrapper(self, *args, **kw):
             # The 'with' syntax automagically
             # takes care of acquiring and
@@ -31,28 +27,28 @@ class Phil2:
             # around the specified block
             		with self.monitor_lock:
                 		return f(self, *args, **kw)
-        		return wrapper
+        	return wrapper
 
 	@synchronized
-	def pickup(self, i):
-        	self.set_state(i, HUNGRY)
-        	self.test(i)
-        	if self.states[i] != EATING:
-            		self.conditions[i].wait()
+	def pickup(self):
+        	state[self.id]=2
+        	self.test(self.id)
+        	if state[self.id] != 3:
+            		can_eat[self.id].wait()
 
-    @synchronized
-    def putdown(self, i):
-        self.set_state(i, THINKING)
-        self.test(self.right(i))
-        self.test(self.left(i))
+	@synchronized
+	def putdown(self):
+        	state[self.id]=1
+        	self.test(self.right(self.id))
+        	self.test(self.left(self.id))
 
-    @synchronized
-    def test(self, i):
-        if (self.states[self.left(i)] != EATING
-            and self.states[self.right(i)] != EATING
-            and self.states[i] == HUNGRY):
-            self.set_state(i, EATING)
-            self.conditions[i].notify()
+	@synchronized
+	def test(self, i):
+        	if (state[self.left(self.id)] != 3
+            	and state[self.right(self.id)] != 3
+            	and state[self.id] == 2):
+            		state[self.id]=3
+            		can_eat[self.id].notify()
 	def eat(self):
 		self.m-=1
 		sleep(random.random())
@@ -65,27 +61,28 @@ class Phil2:
 def condition_solution(phil):
 	global state
 	global can_eat
-	sleep(random.random())
 	while phil.m>0:
-		with can_eat[phil.id]:
-			sleep(random.random())
-			phil.pickup()
-			phil.eat()
-			phil.putdown()
-			sleep(random.random())
-	
+		sleep(random.random())
+		with lock:
+			with can_eat[phil.id]:
+				phil.pickup()
+				phil.eat()
+				phil.putdown()
+				sleep(random.random())
 
 def main(numofphil=5, numofmeal=10):
 	global NUM_PHIL
 	global can_eat
 	global state
 	global lock
-	lock=Semaphore()
+	lock=RLock()
+	global interrupted
+	interrupted=False
 	NUM_PHIL=numofphil
 #solution 4
 #Tanenbaum  solution, where when a philosopher finishes eating, the 
 #neighbors get tested to see if they can eat.
-	random.seed(3)
+	random.seed(1)
 	#thinking=1, hungry=2, eating=3
 	state = [1 for i in range(NUM_PHIL)]
 	can_eat=[Condition() for i in range(numofphil)]

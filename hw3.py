@@ -38,6 +38,7 @@ def no_holding(phil, forks):
 	while phil.m>0:
 		sleep(random.random()) #thinking
 		phil.get_right(forks)
+		sleep(random.random())
 		if not phil.check_left(forks):
 			phil.drop_right(forks)	
 			sleep(random.random()) #pause between getting forks
